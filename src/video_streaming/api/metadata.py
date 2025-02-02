@@ -8,6 +8,7 @@ table['0001'] = {
     'publisher': 'ROSÉ',
     'numDescripter': 15800000,
     'numLikes': 13450000,
+    'bdsrc': 'https://yt3.ggpht.com/qjsflFmyakGs5ekX8fPsDNfuKABx-yxIDrv-4ooPAFcZ6JUUpUPlue7g_d-VAk2YAiYR-0yr=s48-c-k-c0x00ffffff-no-rj',
 };
 
 router = APIRouter()
