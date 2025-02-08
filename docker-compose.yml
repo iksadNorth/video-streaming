@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: ${PG_USERNAME:-iksadnorth}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-q1w2e3r4}
+      POSTGRES_DB: ${PG_DATABASE:-mytube}
+    ports:
+    - "5432:5432"
+    volumes:
+    - pg_data:/var/lib/postgresql/data
+
+volumes:
+  pg_data:

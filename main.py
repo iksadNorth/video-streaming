@@ -8,9 +8,9 @@ app = FastAPI()
 
 
 # Router
-app.include_router(video.router, prefix="/api/v1/video", tags=["video"])
-app.include_router(metadata.router, prefix="/api/v1/metadata", tags=["metadata"])
-app.include_router(comment.router, prefix="/api/v1/comments", tags=["comment"])
+app.include_router(video.router, prefix="/api/v1", tags=["video"])
+app.include_router(metadata.router, prefix="/api/v1", tags=["metadata"])
+app.include_router(comment.router, prefix="/api/v1", tags=["comment"])
 
 # MiddleWare
 cors(app)

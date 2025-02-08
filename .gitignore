@@ -238,3 +238,8 @@ $RECYCLE.BIN/
 # Custom Path
 parts
 video
+*.x.*
+*.xgit.*
+
+# alembic
+alembic.ini

@@ -1,19 +1,29 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.responses import StreamingResponse
-import os
-from src.video_streaming.video import parse_range, range_stream
+from src.video_streaming.model import Video
+from src.video_streaming.db.database import get_session, Session
 
 
 router = APIRouter()
 
-@router.get("/{video_id}")
-async def get_video(video_id: str, request: Request):
-    video_path = f"./video/{video_id}.mp4"
+
+def parse_range(range_header, file_size):
+    if not range_header:
+        return 0, file_size - 1
+    range_str = range_header.replace("bytes=", "").strip()
+    start, end = range_str.split("-")[:2] if "-" in range_str else (int(range_str or 0), file_size - 1)
+    start   = int(start)    if start    else 0
+    end     = int(end)      if end      else file_size - 1
+    return start, end
+
+@router.get("/videos/{video_id}")
+async def get_video(request: Request, video_id: str, session: Session = Depends(get_session)):
+    video: Video = session.query(Video).filter(Video.id == video_id).first()
     
-    if not os.path.exists(video_path):
+    if not video or not video.filePath or not video.filePath.exists():
         raise HTTPException(status_code=404, detail="Video not found")
     
-    file_size = os.path.getsize(video_path)
+    file_size = video.filePath.stat().st_size
     range_header = request.headers.get("range")
     start, end = parse_range(range_header, file_size)
         
@@ -23,5 +33,5 @@ async def get_video(video_id: str, request: Request):
         "Accept-Ranges": "bytes",
         "Content-Type": "video/mp4",
     }
-    
-    return StreamingResponse(range_stream(video_path, start, end), headers=headers, status_code=206)
+
+    return StreamingResponse(video.range_stream(start, end), headers=headers, status_code=206)
