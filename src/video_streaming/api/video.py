@@ -1,5 +1,8 @@
 from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
+from typing import Optional
+from sqlalchemy.orm import joinedload
 from src.video_streaming.model import Video
 from src.video_streaming.db.database import get_session, Session
 
@@ -35,3 +38,28 @@ async def get_video(request: Request, video_id: str, session: Session = Depends(
     }
 
     return StreamingResponse(video.range_stream(start, end), headers=headers, status_code=206)
+
+class MetadateResponse(BaseModel):
+    title: str
+    publisher: str
+    bdsrc: Optional[str]
+    numDescripter: int
+    numLikes: int
+
+@router.get("/videos/{video_id}/metadatas")
+async def get_metadata(
+        video_id: str, 
+        session: Session = Depends(get_session),
+    ):
+    video: Video = session.query(Video)\
+        .options(joinedload(Video.publisher))\
+        .filter(Video.id == video_id)\
+        .first()
+    
+    return MetadateResponse(
+        title=video.title,
+        publisher=getattr(video.publisher, 'nickname', ''),
+        bdsrc=getattr(video.publisher, 'bedge_src', None),
+        numDescripter=0,
+        numLikes=0,
+    )

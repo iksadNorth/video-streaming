@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 from datetime import datetime
 from sqlalchemy.orm import joinedload
+from typing import Optional
 
 from src.video_streaming.model import Comment
 from src.video_streaming.db.database import get_session, Session
@@ -13,7 +14,7 @@ router = APIRouter()
 
 class CommentResponse(BaseModel):
     comment: str
-    src: str
+    src: Optional[str]
     nickname: str
     created_at: datetime
 
