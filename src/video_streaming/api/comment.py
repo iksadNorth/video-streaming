@@ -26,8 +26,10 @@ async def get_comments(
     ):
     query: Query = session.query(Comment)\
         .options(joinedload(Comment.publisher))\
-        .filter(Comment.video_id == video_id)\
-        .order_by(Comment.created_at.desc())
+        .filter(Comment.video_id == video_id)
+    
+    sort_col, is_asc = page.get_sort()
+    query = Comment.add_sort(query, sort_col, is_asc)
     
     def post_process(x: Comment):
         x = CommentResponse(
