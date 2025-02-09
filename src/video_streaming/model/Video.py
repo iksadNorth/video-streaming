@@ -11,6 +11,7 @@ ROOT_DIR = Path.cwd() / config('video.path')
 
 class Video(BaseModel):
     file_path  = Column(String, unique=True)
+    thumbnail_path  = Column(String, unique=True)
     title = Column(String)
     
     publisher_id = Column(Integer, ForeignKey("users.id"))

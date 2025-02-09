@@ -1,10 +1,14 @@
-from fastapi import APIRouter, HTTPException, Request, Depends
+from fastapi import APIRouter, HTTPException, Request, Depends, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from typing import Optional
+from datetime import datetime
 from sqlalchemy.orm import joinedload
+from typing import Optional
+
+from src.video_streaming.config import config
 from src.video_streaming.model import Video
 from src.video_streaming.db.database import get_session, Session
+from src.video_streaming.api.paging import PaginationParams, PaginatedResponse
 
 
 router = APIRouter()
@@ -39,7 +43,7 @@ async def get_video(request: Request, video_id: str, session: Session = Depends(
 
     return StreamingResponse(video.range_stream(start, end), headers=headers, status_code=206)
 
-class MetadateResponse(BaseModel):
+class VideoUnitResponse(BaseModel):
     title: str
     publisher: str
     bdsrc: Optional[str]
@@ -56,10 +60,49 @@ async def get_metadata(
         .filter(Video.id == video_id)\
         .first()
     
-    return MetadateResponse(
+    return VideoUnitResponse(
         title=video.title,
         publisher=getattr(video.publisher, 'nickname', ''),
         bdsrc=getattr(video.publisher, 'bedge_src', None),
         numDescripter=0,
         numLikes=0,
+    )
+
+class VideoArrResponse(BaseModel):
+    videoId: int
+    thumbnail: Optional[str]
+    title: str
+    publisher: str
+    bdsrc: Optional[str]
+    numViews: int
+    created_at: datetime
+
+@router.get("/videos")
+async def get_video_arr(
+        session: Session = Depends(get_session), 
+        page: PaginationParams = Depends(),
+    ):
+    query: Query = session.query(Video)\
+        .options(joinedload(Video.publisher))
+    
+    sort_col, is_asc = page.get_sort()
+    query = Video.add_sort(query, sort_col, is_asc)
+    
+    app_url = config('app.url')
+    def post_process(x: Video):
+        x = VideoArrResponse(
+            videoId=x.id,
+            thumbnail=f'{app_url}/static/{x.thumbnail_path}',
+            title=x.title.strip(),
+            publisher=getattr(x.publisher, 'nickname', ''),
+            bdsrc=getattr(x.publisher, 'bedge_src', None),
+            numViews=0,
+            created_at=x.created_at,
+        )
+        return x
+    
+    return PaginatedResponse.from_query(
+        params=page,
+        query=query,
+        post_process=post_process,
     )

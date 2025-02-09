@@ -237,7 +237,7 @@ $RECYCLE.BIN/
 
 # Custom Path
 parts
-video
+static
 *.x.*
 *.xgit.*
 
