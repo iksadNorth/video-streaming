@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from src.video_streaming.middleware.cors import cors
-from src.video_streaming.api import video, comment
+from src.video_streaming.api import video, comment, auth
 from src.video_streaming.config import config
 
 
@@ -12,6 +12,7 @@ app = FastAPI()
 # Router
 app.include_router(video.router, prefix="/api/v1", tags=["video"])
 app.include_router(comment.router, prefix="/api/v1", tags=["comment"])
+app.include_router(auth.router, prefix="/api/v1", tags=["auth"])
 
 # MiddleWare
 cors(app)
