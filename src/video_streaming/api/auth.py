@@ -4,7 +4,7 @@ from pydantic import BaseModel
 import requests
 from src.video_streaming.config import config
 from src.video_streaming.model import Users
-from src.video_streaming.db.database import get_session, Session
+from src.video_streaming.db.database import get_db, Session
 from src.video_streaming.utils.jwt import create_access_token
 
 
@@ -32,7 +32,7 @@ class OAuthResponse(BaseModel):
 @router.post("/auth/google/callback")
 async def auth_google_callback(
         item: OAuthRequest, 
-        session: Session = Depends(get_session), 
+        session: Session = Depends(get_db), 
     ):
     data = {
         "code": item.code,
