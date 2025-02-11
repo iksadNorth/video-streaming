@@ -2,7 +2,7 @@ import os
 import aiohttp
 import asyncio
 
-from src.video_streaming.utils import pair
+from src.video_streaming.utils.utils import pair
 
 
 class DownLoader:

@@ -3,6 +3,9 @@ from fastapi.security import OAuth2AuthorizationCodeBearer
 from pydantic import BaseModel
 import requests
 from src.video_streaming.config import config
+from src.video_streaming.model import Users
+from src.video_streaming.db.database import get_session, Session
+from src.video_streaming.utils.jwt import create_access_token
 
 
 router = APIRouter()
@@ -17,11 +20,20 @@ oauth2_scheme = OAuth2AuthorizationCodeBearer(
     tokenUrl=TOKEN_URL
 )
 
-class Item(BaseModel):
+class OAuthRequest(BaseModel):
     code: str
+class UserResponse(BaseModel):
+    nickname: str
+    bedge_src: str
+class OAuthResponse(BaseModel):
+    access_token: str
+    user: UserResponse
 
 @router.post("/auth/google/callback")
-async def auth_callback(item: Item):
+async def auth_google_callback(
+        item: OAuthRequest, 
+        session: Session = Depends(get_session), 
+    ):
     data = {
         "code": item.code,
         "client_id": config("oauth.google.client_id"),
@@ -43,6 +55,23 @@ async def auth_callback(item: Item):
         raise HTTPException(status_code=400, detail="Failed to get user info")
 
     result = user_info.json()
-    result['access_token'] = 'test'
-    print(result)
-    return result
+    
+    email_loggined = result.get('email')
+    user_in_db = session.query(Users).filter(Users.email == email_loggined).first()
+    if not user_in_db:
+        user_in_db = Users(
+            email=email_loggined, 
+            nickname=result.get('given_name'),
+            bedge_src=result.get('picture'), 
+        )
+        session.add(user_in_db)
+    
+    user_res = UserResponse(
+        nickname=user_in_db.nickname,
+        bedge_src=user_in_db.bedge_src,
+    )
+    oauth_res = OAuthResponse(
+        access_token=create_access_token({'sub': user_in_db.email, 'role': 'users'}),
+        user=user_res,
+    )
+    return oauth_res
