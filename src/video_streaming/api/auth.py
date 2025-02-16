@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import OAuth2AuthorizationCodeBearer
 from pydantic import BaseModel
 import requests
@@ -11,7 +11,7 @@ from src.video_streaming.utils.jwt import create_access_token
 router = APIRouter()
 
 
-REDIRECT_URI = "http://localhost:3000/auth/google/callback"
+REDIRECT_URI = "auth/google/callback"
 TOKEN_URL = "https://oauth2.googleapis.com/token"
 AUTHORIZATION_URL = "https://accounts.google.com/o/oauth2/auth"
 
@@ -31,14 +31,17 @@ class OAuthResponse(BaseModel):
 
 @router.post("/auth/google/callback")
 async def auth_google_callback(
+        request: Request,
         item: OAuthRequest, 
         session: Session = Depends(get_db), 
     ):
+    origin = request.headers.get('origin')
+    
     data = {
         "code": item.code,
         "client_id": config("oauth.google.client_id"),
         "client_secret": config("oauth.google.client_secret"),
-        "redirect_uri": REDIRECT_URI,
+        "redirect_uri": f'{origin}/{REDIRECT_URI}',
         "grant_type": "authorization_code"
     }
     response = requests.post(TOKEN_URL, data=data)
