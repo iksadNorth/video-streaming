@@ -5,7 +5,7 @@ from src.video_streaming.model import BaseModel
 
 
 class Comment(BaseModel):
-    comment = Column(Text, unique=True)
+    comment = Column(Text)
     
     publisher_id = Column(Integer, ForeignKey("users.id"))
     publisher = relationship("Users", back_populates="comments")

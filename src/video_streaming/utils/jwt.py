@@ -1,8 +1,10 @@
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from src.video_streaming.config import config
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Security
 from fastapi.security import OAuth2PasswordBearer
+from src.video_streaming.model import Users
+from src.video_streaming.db.database import Session, get_session
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -27,3 +29,8 @@ def verify_access_token(token: str = Depends(oauth2_scheme)):
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+def get_user_login(session: Session = Depends(get_session), payload: dict = Depends(verify_access_token)):
+    query = session.query(Users)\
+        .filter(Users.email == payload.get('sub'))
+    return query.first()

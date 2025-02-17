@@ -12,7 +12,7 @@ class BaseModel(SortLogic):
         return cls.__name__.lower()  # 테이블 이름을 모델 이름 소문자로 설정
     
     id = Column(BigInteger, primary_key=True, index=True)
-    created_at = Column(DateTime, default=func.now(), nullable=False)
+    created_at = Column(DateTime, default=func.timezone("Asia/Seoul", func.now()), nullable=False)
     
     
     @classmethod
