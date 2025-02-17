@@ -1,8 +1,8 @@
-from fastapi import APIRouter, HTTPException, Request, Depends, Query
+from fastapi import APIRouter, HTTPException, Request, Depends
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from datetime import datetime
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, Query
 from typing import Optional
 
 from src.video_streaming.config import config
@@ -79,11 +79,15 @@ class VideoArrResponse(BaseModel):
 
 @router.get("/videos")
 async def get_video_arr(
+        keyword: Optional[str],
         session: Session = Depends(get_session), 
         page: PaginationParams = Depends(),
     ):
     query: Query = session.query(Video)\
         .options(joinedload(Video.publisher))
+    
+    if keyword:
+        query = query.filter(Video.title.ilike(f'%{keyword}%'))
     
     sort_col, is_asc = page.get_sort()
     query = Video.add_sort(query, sort_col, is_asc)
