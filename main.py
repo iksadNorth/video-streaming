@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 
 from src.video_streaming.middleware.cors import cors
 from src.video_streaming.api import video, comment, auth
@@ -18,7 +19,8 @@ app.include_router(auth.router, prefix="/api/v1", tags=["auth"])
 cors(app)
 
 # 특정 폴더의 파일을 "/static" 경로에서 제공
-app.mount("/static", StaticFiles(directory=config('video.path')), name="static")
+static_path = Path(config('video.path'))
+app.mount("/static", StaticFiles(directory=static_path), name="static")
 
 
 @app.get("/api/v1/health")

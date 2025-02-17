@@ -7,7 +7,7 @@ from src.video_streaming.model.BaseModel import BaseModel
 from src.video_streaming.config import config
 
 
-ROOT_DIR = Path.cwd() / config('video.path')
+ROOT_DIR = Path(config('video.path'))
 
 class Video(BaseModel):
     file_path  = Column(String, unique=True)
