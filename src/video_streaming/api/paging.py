@@ -9,7 +9,7 @@ T = TypeVar("T")
 class PaginationParams(BaseModel, Generic[T]):
     page: int = Field(1, ge=1)
     page_size: int = Field(10, ge=1, le=100)
-    sort: Optional[str] = Query(...)
+    sort: Optional[str] = Query(None)
     
     def add_pages(self, query: ormQuery):
         return query.limit(self.page_size).offset((self.page - 1) * self.page_size)
@@ -18,6 +18,8 @@ class PaginationParams(BaseModel, Generic[T]):
     # field '-created_at'
     # return tuple(created_at, desc)
     def get_sort(self):
+        if not self.sort: 
+            return None, None
         return self.sort.lstrip("-"), self.sort.startswith("-")
 
 class PaginatedResponse(BaseModel, Generic[T]):

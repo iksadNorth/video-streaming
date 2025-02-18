@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request, Depends
+from fastapi import APIRouter, HTTPException, Request, Depends, Query as fastQuery
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from datetime import datetime
@@ -79,7 +79,7 @@ class VideoArrResponse(BaseModel):
 
 @router.get("/videos")
 async def get_video_arr(
-        keyword: Optional[str],
+        keyword: Optional[str] = fastQuery(None),
         session: Session = Depends(get_session), 
         page: PaginationParams = Depends(),
     ):
