@@ -6,6 +6,7 @@ from src.video_streaming.config import config
 from src.video_streaming.model import Users
 from src.video_streaming.db.database import get_db, Session
 from src.video_streaming.utils.jwt import create_access_token
+from src.video_streaming.api.users import UserReadResponse
 
 
 router = APIRouter()
@@ -22,12 +23,9 @@ oauth2_scheme = OAuth2AuthorizationCodeBearer(
 
 class OAuthRequest(BaseModel):
     code: str
-class UserResponse(BaseModel):
-    nickname: str
-    bedge_src: str
 class OAuthResponse(BaseModel):
     access_token: str
-    user: UserResponse
+    user: UserReadResponse
 
 @router.post("/auth/google/callback")
 async def auth_google_callback(
@@ -69,7 +67,7 @@ async def auth_google_callback(
         )
         session.add(user_in_db)
     
-    user_res = UserResponse(
+    user_res = UserReadResponse(
         nickname=user_in_db.nickname,
         bedge_src=user_in_db.bedge_src,
     )
