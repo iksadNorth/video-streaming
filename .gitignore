@@ -240,6 +240,7 @@ parts
 static
 *.x.*
 *.xgit.*
+*.template
 
 # alembic
 alembic.ini
