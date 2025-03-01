@@ -241,6 +241,7 @@ static
 *.x.*
 *.xgit.*
 *.template
+logs/
 
 # alembic
 alembic.ini

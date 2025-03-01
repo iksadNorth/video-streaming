@@ -246,6 +246,11 @@ static
 *.xdocker.*
 README.md
 tests
+logs/
+
+# Docker
+docker-compose.yml
+Dockerfile
 
 # alembic
 alembic.ini

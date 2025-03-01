@@ -5,6 +5,7 @@ from pathlib import Path
 from src.video_streaming.middleware.cors import cors
 from src.video_streaming.api import video, comment, auth, users
 from src.video_streaming.config import config
+from src.video_streaming.middleware.logging import log_requests
 
 
 app = FastAPI()
@@ -18,6 +19,7 @@ app.include_router(users.router, prefix="/api/v1", tags=["users"])
 
 # MiddleWare
 cors(app)
+app.middleware("http")(log_requests)
 
 # 특정 폴더의 파일을 "/static" 경로에서 제공
 static_path = Path(config('video.path'))
