@@ -247,6 +247,7 @@ static
 README.md
 tests
 logs/
+scripts
 
 # Docker
 docker-compose.yml
