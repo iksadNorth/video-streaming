@@ -3,7 +3,7 @@ from logging.handlers import TimedRotatingFileHandler
 from src.video_streaming.config import config
 
 
-log_file = config('app.log_path')
+log_file = config('app.log_path') or 'logs/app.log'
 
 handler = TimedRotatingFileHandler(
     log_file, when="midnight", interval=1, encoding="utf-8"

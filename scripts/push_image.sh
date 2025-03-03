@@ -2,5 +2,5 @@
 
 
 image=$1
-docker tag $image myhome:5000/$image
-docker push myhome:5000/$image
+docker tag $image myhome.com:5000/$image
+docker push myhome.com:5000/$image
